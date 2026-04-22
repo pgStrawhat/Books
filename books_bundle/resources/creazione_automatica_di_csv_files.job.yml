@@ -1,0 +1,32 @@
+resources:
+  jobs:
+    creazione_automatica_di_csv_files:
+      name: creazione automatica di csv files
+      tasks:
+        - task_key: auto_csv_file_creation
+          email_notifications: {}
+          environment_key: auto_csv_file_creation_environment
+          run_if: ALL_SUCCESS
+          spark_python_task:
+            python_file: /Workspace/Users/paolo.gattesco@tinextacyber.com/Books/csv_books_creation.py
+          timeout_seconds: 0
+      continuous:
+        pause_status: PAUSED
+        task_retry_mode: ON_FAILURE
+      email_notifications:
+        no_alert_for_skipped_runs: false
+      environments:
+        - environment_key: Default
+          spec:
+            environment_version: "5"
+        - environment_key: auto_csv_file_creation_environment
+          spec:
+            dependencies:
+              - faker==40.15.0
+            environment_version: "5"
+      max_concurrent_runs: 1
+      performance_target: PERFORMANCE_OPTIMIZED
+      queue:
+        enabled: true
+      timeout_seconds: 0
+      webhook_notifications: {}

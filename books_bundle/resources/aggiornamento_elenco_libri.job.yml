@@ -1,0 +1,55 @@
+resources:
+  jobs:
+    aggiornamento_elenco_libri:
+      name: Aggiornamento elenco libri
+      tasks:
+        - task_key: landing
+          email_notifications: {}
+          environment_key: landing_environment
+          notebook_task:
+            notebook_path: ../src/aggiornamento_elenco_libri/add_new_books.ipynb
+            source: WORKSPACE
+          run_if: ALL_SUCCESS
+          timeout_seconds: 0
+          webhook_notifications: {}
+        - task_key: data_transformation
+          depends_on:
+            - task_key: landing
+          email_notifications: {}
+          pipeline_task:
+            full_refresh: false
+            pipeline_id: 2f9a3b7f-7bf1-47ff-a141-757a329e778f
+          run_if: ALL_SUCCESS
+          timeout_seconds: 0
+          webhook_notifications: {}
+        - task_key: result
+          depends_on:
+            - task_key: data_transformation
+          email_notifications: {}
+          notebook_task:
+            notebook_path: ../src/aggiornamento_elenco_libri/result_gold_master.ipynb
+            source: WORKSPACE
+          run_if: ALL_SUCCESS
+          timeout_seconds: 0
+          webhook_notifications: {}
+      email_notifications:
+        no_alert_for_skipped_runs: false
+      environments:
+        - environment_key: csv_creation_environment
+          spec:
+            dependencies:
+              - faker==40.15.0
+            environment_version: "5"
+        - environment_key: landing_environment
+          spec:
+            environment_version: "5"
+      max_concurrent_runs: 1
+      performance_target: PERFORMANCE_OPTIMIZED
+      queue:
+        enabled: true
+      timeout_seconds: 0
+      trigger:
+        file_arrival:
+          url: /Volumes/workspace/default/bookstore_dataset/books-csv-new/
+        pause_status: UNPAUSED
+      webhook_notifications: {}
